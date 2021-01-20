@@ -1,0 +1,61 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: be7e3e9a7d4e81a4d8b933a4d7127ea2, type: 3}
+  m_Name: Attack
+  m_EditorClassIdentifier: 
+  moveName: Attack
+  description: 
+  clip: {fileID: 7400000, guid: 6bbe535597e729941a1d361d2c71fc37, type: 2}
+  animationStateName: attack
+  layerNumber: 0
+  hitFrameStart: 21
+  hitFrameEnd: 25
+  _animationFullNameHash: 1156809592
+  animMap:
+    animationMaps:
+    - frame: 0
+      boneID: 0
+    clip: {fileID: 6374613629039001740, guid: d3b20e0b5bc11034cace0771f0ce2fde, type: 3}
+    animatorStateName: 
+    layerNumber: 0
+  _animationSpeed: 0
+  fps: 0
+  wrapMode: 0
+  hitCollection:
+  - priority: 0
+    follow: {fileID: 0}
+    frameStart: 2
+    frameEnd: 23
+    bounds:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 1
+      height: 1
+    damage: 0
+    hitboxEditorToggle: 1
+    isHit: []
+  - priority: 0
+    follow: {fileID: 0}
+    frameStart: 0
+    frameEnd: 1
+    bounds:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 0
+      height: 0
+    damage: 0
+    hitboxEditorToggle: 1
+    isHit: []
+  fixedSpeed: 0
+  isHit: []

@@ -1,0 +1,32 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: be7e3e9a7d4e81a4d8b933a4d7127ea2, type: 3}
+  m_Name: Idle
+  m_EditorClassIdentifier: 
+  moveName: Idle
+  description: 
+  clip: {fileID: 3517913400575307412, guid: 6c4a9782e6f245e4ead8fd569883863a, type: 3}
+  animationStateName: idle
+  layerNumber: 0
+  hitFrameStart: 0
+  hitFrameEnd: 0
+  _animationFullNameHash: -178524345
+  animMap:
+    animationMaps: []
+    clip: {fileID: 0}
+    animatorStateName: 
+    layerNumber: 0
+  _animationSpeed: 0
+  fps: 0
+  wrapMode: 0
+  hits: []
+  fixedSpeed: 0

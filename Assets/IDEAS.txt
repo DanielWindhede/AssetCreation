@@ -1,0 +1,7 @@
+Inventory UI som man kan öppna submenyer i
+Overworld
+Fungus-esk textmeny
+Fighting game
+Hitbox system
+Kirby Airride ripoff
+Cave story ripoff
