@@ -71,7 +71,6 @@ public class MoveEditorWindow : EditorWindow
 			if (selection[0] == null)
 				return;
 			move = (Move)selection[0];
-			print(move.moveName);
 			//fpsTemp = moveInfo.fps;
 			//animationSpeedTemp = moveInfo.animationSpeed;
 			//totalFramesTemp = moveInfo.totalFrames;
@@ -176,7 +175,7 @@ public class MoveEditorWindow : EditorWindow
 				{
 					EditorGUILayout.BeginHorizontal();
 					{
-						drawHitboxes = EditorGUILayout.Toggle("Draw hitboxes", drawHitboxes);
+						Drawer.drawHitboxes = EditorGUILayout.Toggle("Draw hitboxes", Drawer.drawHitboxes);
 						useSmoothScrubbing = EditorGUILayout.Toggle("Smooth scrubframes", useSmoothScrubbing);
 					}
 					EditorGUILayout.EndHorizontal();
@@ -212,17 +211,53 @@ public class MoveEditorWindow : EditorWindow
 						EditorGUI.indentLevel = 1;
 						if (showHitboxDropdown)
 						{
-							for (int i = 0; i < move.hitCollection.Length; i++)
+							if (move.hitCollection != null)
 							{
-								move.hitCollection[i].hitboxEditorToggle = EditorGUILayout.Foldout(move.hitCollection[i].hitboxEditorToggle,
-									"Hitbox (" + i + ")" + ", P(" + move.hitCollection[i].priority.ToString() + ")", true, EditorStyles.foldout);
-								
-								if (move.hitCollection[i].hitboxEditorToggle)
+								StyledMarker();
+								for (int i = 0; i < move.hitCollection.Length; i++)
 								{
+									/*
+									move.hitCollection[i].hitboxEditorToggle = EditorGUILayout.Foldout(move.hitCollection[i].hitboxEditorToggle,
+										"Hitbox (" + i + ")" + ", P(" + move.hitCollection[i].priority.ToString() + ")", true, EditorStyles.foldout);
+
+									if (move.hitCollection[i].hitboxEditorToggle)
+									{
+										*/
 									EditorGUILayout.BeginVertical("ObjectFieldThumb");
 									{
-										StyledMinMaxSlider(ref move.hitCollection[i].frameStart, ref move.hitCollection[i].frameEnd, 0,
-														  (int)(move.animMap.clip.length * FPS), EditorGUI.indentLevel);
+										move.hitCollection[i].isMultiHit = EditorGUILayout.Toggle("Is multi-hit:", move.hitCollection[i].isMultiHit);
+										if (move.hitCollection[i].isMultiHit)
+										{
+											//move.hitCollection[i].frameStart = EditorGUILayout.IntField("First Active Frame:", move.hitCollection[i].frameStart);
+											//StyledSlider(ref move.hitCollection[i].frameStart, 0, TotalFrames, EditorGUI.indentLevel);
+
+											Rect tempRect = GUILayoutUtility.GetRect(1, 10);
+											Rect rect = new Rect(EditorGUI.indentLevel, tempRect.y, position.width - EditorGUI.indentLevel - 100, 20);
+
+											Hit hit = move.hitCollection[i];
+											int availableTotalFrames = TotalFrames - hit.multiHitTimes * hit.multiHitActiveFrames - (hit.multiHitTimes - 1) * hit.multiHitDelay + 1;
+											move.hitCollection[i].frameStart = EditorGUILayout.IntSlider("Active: ", move.hitCollection[i].frameStart, 0, availableTotalFrames);
+											EditorGUILayout.BeginHorizontal();
+											{
+												move.hitCollection[i].multiHitTimes = EditorGUILayout.IntField("Hit times:", hit.multiHitTimes);
+												move.hitCollection[i].multiHitTimes = Mathf.Max(1, hit.multiHitTimes);
+
+												move.hitCollection[i].multiHitDelay = EditorGUILayout.IntField("Hit delay:", hit.multiHitDelay);
+												move.hitCollection[i].multiHitDelay = Mathf.Max(0, hit.multiHitDelay);
+
+												move.hitCollection[i].multiHitActiveFrames = EditorGUILayout.IntField("Active frames:", hit.multiHitActiveFrames);
+												move.hitCollection[i].multiHitActiveFrames = Mathf.Max(1, hit.multiHitActiveFrames);
+											}
+											EditorGUILayout.EndHorizontal();
+
+											int totalFrameEnd = (hit.frameStart + (hit.multiHitTimes - 1) * hit.multiHitDelay + hit.multiHitTimes * hit.multiHitActiveFrames - 1);
+											GUILayout.Label("Active frames: " + hit.frameStart + " - " + totalFrameEnd.ToString());
+										}
+										else
+										{
+											StyledMinMaxSlider(ref move.hitCollection[i].frameStart, ref move.hitCollection[i].frameEnd, 0,
+															  (int)(move.animMap.clip.length * FPS), EditorGUI.indentLevel);
+										}
 
 										GUILayout.Label("Bounds");
 										EditorGUILayout.BeginHorizontal();
@@ -248,14 +283,17 @@ public class MoveEditorWindow : EditorWindow
 										move.hitCollection = RemoveElement<Hit>(move.hitCollection, move.hitCollection[i]);
 
 									EditorGUILayout.EndVertical();
+									//}
 								}
 							}
+
+							EditorGUILayout.Space(25);
+
+							if (GUILayout.Button("Add hitbox"))
+							{
+								move.hitCollection = AddElement<Hit>(move.hitCollection, new Hit());
+							}
 						}
-
-						EditorGUILayout.Space(25);
-
-						if (GUILayout.Button("Add hitbox"))
-							move.hitCollection = AddElement<Hit>(move.hitCollection, new Hit());
 
 						EditorGUI.indentLevel = 0;
 					}
@@ -309,7 +347,13 @@ public class MoveEditorWindow : EditorWindow
 
 				if (GUI.changed)
 				{
+                    foreach (var hit in move.hitCollection)
+                    {
+						hit.CalculateMultiHitFrames();
+                    }
+
 					Undo.RecordObject(move, "Move Editor Modify");
+
 					EditorUtility.SetDirty(move);
 				}
 			}
@@ -326,6 +370,215 @@ public class MoveEditorWindow : EditorWindow
 			//}
 			//if (moveInfo.totalFrames > totalFramesGlobal)
 			//	totalFramesGlobal = moveInfo.totalFrames;
+		}
+
+		HashSet<Vector2Int> fillBounds;
+		int hitCollectionLength;
+
+		//void StyledMarker(string label, Vector3[] locations, int maxValue, int indentLevel, bool fillBounds)
+		void StyledMarker()
+		{
+			Rect tempRect = GUILayoutUtility.GetRect(1, 20);
+			Rect rect = new Rect(30, tempRect.y, position.width - 30 * 2, 20);
+			GUI.Box(rect, "", "ProgressBarBack");
+
+			List<Vector2Int> activeFrames = new List<Vector2Int>();
+            for (int i = 0; i < move.hitCollection.Length; i++)
+            {
+				if (move.hitCollection[i].isMultiHit)
+				{
+					for (int j = 0; j < move.hitCollection[i].MultiFrameStart.Length; j++)
+					{
+						Vector2Int v = new Vector2Int();
+						v.x = move.hitCollection[i].MultiFrameStart[j];
+						v.y = move.hitCollection[i].MultiFrameEnd[j];
+						activeFrames.Add(v);
+					}
+				}
+				else
+				{
+					activeFrames.Add(new Vector2Int(move.hitCollection[i].FrameStart, move.hitCollection[i].FrameEnd));
+				}
+            }
+
+			if (activeFrames.Count > 0)
+			{
+				string redColor = "flow node 6 on";
+				string orangeColor = "flow node 5 on";
+				string cyanColor = "flow node 2 on";
+				string greenColor = "flow node 3 on";
+
+				int lastFrame = 0;
+				float unit = rect.width / TotalFrames;
+				foreach (Vector2 i in activeFrames)
+				{
+					//lastLocation = i.y;
+					//fillLeftPos = ((rect.width / TotalFrames) * i.x) + rect.x;
+					//fillRightPos = ((rect.width / TotalFrames) * i.y) + rect.x;
+
+					float left = rect.x + unit * i.x;
+					float right = unit * (i.y - i.x);
+
+					if (lastFrame < i.y)
+						lastFrame = (int)i.y;
+
+					// Active
+					GUI.Box(new Rect(left, rect.y, right, rect.height), new GUIContent(), greenColor);
+
+
+					//fillWidth += (rect.width/maxValue);
+					//fillLeftPos -= (rect.width/maxValue);
+					//GUI.Box(new Rect(fillLeftPos, rect.y, fillWidth, rect.height), new GUIContent(), "flow node 5 on");
+
+					/*
+					if (i.z > 0)
+					{
+						GUI.Box(new Rect(fillLeftPos, rect.y, fillWidth, rect.height), new GUIContent(), "flow node 5 on");
+					}
+					else
+					{
+						GUI.Box(new Rect(fillLeftPos, rect.y, fillWidth, rect.height), new GUIContent(), "flow node 2 on");
+					}
+					*/
+				}
+
+				// Lag
+				//GUI.Box(new Rect(unit * (TotalFrames - lastFrame), rect.y, rect.width - unit * (TotalFrames - lastFrame), rect.height), new GUIContent(), redColor);
+
+				/*
+				if (activeFrames.Count > 0 && lastLocation < TotalFrames)
+				{
+					float fillWidth = rect.width - fillRightPos + rect.x;
+					GUI.Box(new Rect(fillRightPos, rect.y, fillWidth, rect.height), new GUIContent(), "flow node 6 on");
+				}
+				*/
+
+				EditorGUILayout.Space();
+				GUILayout.BeginHorizontal("HelpBox");
+				{
+					/*
+					labelStyle.normal.textColor = Color.yellow;
+					moveInfo.startUpFrames = locations[0].x <= 0 ? 0 : moveInfo.hits[0].activeFramesBegin - 1;
+					GUILayout.Label("Start Up: " + moveInfo.startUpFrames, labelStyle);
+					labelStyle.normal.textColor = Color.cyan;
+					move.activeFrames = (moveInfo.hits[moveInfo.hits.Length - 1].activeFramesEnds - moveInfo.hits[0].activeFramesBegin);
+					GUILayout.Label("Active: " + moveInfo.activeFrames, labelStyle);
+					labelStyle.normal.textColor = Color.red;
+					moveInfo.recoveryFrames = lastLocation >= maxValue ? 0 : (moveInfo.totalFrames - moveInfo.hits[moveInfo.hits.Length - 1].activeFramesEnds + 1);
+					GUILayout.Label("Recovery: " + moveInfo.recoveryFrames, labelStyle);
+					*/
+				}
+				GUILayout.EndHorizontal();
+			}
+
+			/*
+			if (hitCollectionLength != move.hitCollection.Length)
+			{
+				*/
+			//fillBounds.Clear();
+			/*
+			for (int i = 0; i < move.hitCollection.Length; i++)
+				{
+					Hit hit = move.hitCollection[i];
+					if (hit.isMultiHit)
+					{
+						for (int time = 1; time <= hit.multiHitTimes; time++)
+						{
+							Vector2Int vec = new Vector2Int();
+
+							vec.x = hit.frameStart + (time - 1) * hit.multiHitDelay + (time - 1) * hit.multiHitActiveFrames;
+							vec.y = hit.frameStart + time * hit.multiHitActiveFrames - 1 + (time - 1) * hit.multiHitDelay;
+
+							fillBounds.Add(vec);
+						}
+					}
+					else
+					{
+						fillBounds.Add(new Vector2Int(hit.frameStart, hit.frameEnd));
+					}
+
+				}
+			*/
+			/*
+			hitCollectionLength = move.hitCollection.Length;
+		}
+		*/
+
+			/*
+			if (indentLevel == 1)
+				indentLevel++;
+			int indentSpacing = 25 * indentLevel;
+
+			EditorGUILayout.Space();
+			EditorGUILayout.Space();
+			Rect tempRect = GUILayoutUtility.GetRect(1, 20);
+			Rect rect = new Rect(indentSpacing, tempRect.y, position.width - indentSpacing - 60, 20);
+
+			// Border
+			GUI.Box(rect, "", borderBarStyle);
+
+			if (fillBounds && locations.Length > 0 && locations[0].x > 0)
+			{
+				float firstLeftPos = ((rect.width / maxValue) * locations[0].x);
+				//firstLeftPos -= (rect.width/maxValue);
+				GUI.Box(new Rect(rect.x, rect.y, firstLeftPos, rect.height), new GUIContent(), "flow node 4 on");
+			}
+
+			// Overlay
+			float fillLeftPos = 0;
+			float fillRightPos = 0;
+			float lastLocation = 0;
+			foreach (Vector3 i in locations)
+			{
+				lastLocation = i.y;
+				fillLeftPos = ((rect.width / maxValue) * i.x) + rect.x;
+				fillRightPos = ((rect.width / maxValue) * i.y) + rect.x;
+
+				float fillWidth = fillRightPos - fillLeftPos;
+				//fillWidth += (rect.width/maxValue);
+				//fillLeftPos -= (rect.width/maxValue);
+
+				if (i.z > 0)
+				{
+					GUI.Box(new Rect(fillLeftPos, rect.y, fillWidth, rect.height), new GUIContent(), fillBarStyle5);
+				}
+				else
+				{
+					GUI.Box(new Rect(fillLeftPos, rect.y, fillWidth, rect.height), new GUIContent(), fillBarStyle2);
+				}
+			}
+
+			if (fillBounds && locations.Length > 0 && lastLocation < maxValue)
+			{
+				float fillWidth = rect.width - fillRightPos + rect.x;
+				GUI.Box(new Rect(fillRightPos, rect.y, fillWidth, rect.height), new GUIContent(), fillBarStyle4);
+			}
+
+			// Text
+			GUI.Label(rect, new GUIContent(label), labelStyle);
+
+			if (fillBounds && locations.Length > 0)
+			{
+				EditorGUILayout.Space();
+				GUILayout.BeginHorizontal(subArrayElementStyle);
+				{
+					labelStyle.normal.textColor = Color.yellow;
+					moveInfo.startUpFrames = locations[0].x <= 0 ? 0 : moveInfo.hits[0].activeFramesBegin - 1;
+					GUILayout.Label("Start Up: " + moveInfo.startUpFrames, labelStyle);
+					labelStyle.normal.textColor = Color.cyan;
+					move.activeFrames = (moveInfo.hits[moveInfo.hits.Length - 1].activeFramesEnds - moveInfo.hits[0].activeFramesBegin);
+					GUILayout.Label("Active: " + moveInfo.activeFrames, labelStyle);
+					labelStyle.normal.textColor = Color.red;
+					moveInfo.recoveryFrames = lastLocation >= maxValue ? 0 : (moveInfo.totalFrames - moveInfo.hits[moveInfo.hits.Length - 1].activeFramesEnds + 1);
+					GUILayout.Label("Recovery: " + moveInfo.recoveryFrames, labelStyle);
+				}
+				GUILayout.EndHorizontal();
+			}
+			labelStyle.normal.textColor = Color.white;
+
+			//GUI.skin.label.normal.textColor = new Color(.706f, .706f, .706f, 1);
+			tempRect = GUILayoutUtility.GetRect(1, 20);
+			*/
 		}
 
 
@@ -408,7 +661,13 @@ public class MoveEditorWindow : EditorWindow
 
 	public T[] AddElement<T>(T[] elements, T element)
 	{
-		List<T> l = new List<T>(elements);
+		List<T> l;
+
+		if (elements == null)
+			l = new List<T>();
+		else
+			l = new List<T>(elements);
+
 		l.Add(element);
 		return l.ToArray();
 	}
@@ -429,9 +688,17 @@ public class MoveEditorWindow : EditorWindow
 		EditorGUILayout.Space();
 
 		minValue = Mathf.Max(minValue, minLimit);
-		minValue = Mathf.Min(minValue, maxValue - 1);
-		maxValue = Mathf.Max(maxValue, minLimit + 1);
+		maxValue = Mathf.Max(maxValue, minLimit);
+
+		//minValue = Mathf.Min(minValue, maxValue);
+		//maxValue = Mathf.Min(maxValue, maxLimit);
+
+		/*
+		minValue = Mathf.Max(minValue, minLimit);
+		minValue = Mathf.Min(minValue, maxValue);
+		maxValue = Mathf.Max(maxValue, minLimit);
 		maxValue = Mathf.Min(maxValue, maxLimit);
+		*/
 
 		/*if (minValue < minLimit) minValue = minLimit;
 		if (maxValue < 1) maxValue = 1;
@@ -468,7 +735,7 @@ public class MoveEditorWindow : EditorWindow
 		labelStyle.alignment = TextAnchor.UpperCenter;
 		GUI.Label(rect, "Active: " + Mathf.Floor(minValueFloat) + " - " + Mathf.Floor(maxValueFloat), labelStyle);
 		labelStyle.alignment = TextAnchor.MiddleCenter;
-		
+
 		// Slider
 		rect.y += 10;
 		rect.x = indentLevel * 10;
@@ -477,6 +744,65 @@ public class MoveEditorWindow : EditorWindow
 		EditorGUI.MinMaxSlider(rect, ref minValueFloat, ref maxValueFloat, minLimitFloat, maxLimitFloat);
 		minValue = (int)Mathf.Floor(minValueFloat);
 		maxValue = (int)Mathf.Floor(maxValueFloat);
+
+		tempRect = GUILayoutUtility.GetRect(1, 20);
+	}
+
+	public void StyledSlider(ref int value, int minLimit, int maxLimit, int indentLevel)
+	{
+		int indentSpacing = 25 * indentLevel;
+		//indentSpacing += 30;
+		EditorGUILayout.Space();
+		EditorGUILayout.Space();
+
+		value = Mathf.Max((int)value, (int)minLimit);
+
+		//minValue = Mathf.Min(minValue, maxValue);
+		//maxValue = Mathf.Min(maxValue, maxLimit);
+
+		/*
+		minValue = Mathf.Max(minValue, minLimit);
+		minValue = Mathf.Min(minValue, maxValue);
+		maxValue = Mathf.Max(maxValue, minLimit);
+		maxValue = Mathf.Min(maxValue, maxLimit);
+		*/
+
+		/*if (minValue < minLimit) minValue = minLimit;
+		if (maxValue < 1) maxValue = 1;
+		if (maxValue > maxLimit) maxValue = maxLimit;
+		if (minValue == maxValue) minValue --;*/
+
+		Rect tempRect = GUILayoutUtility.GetRect(1, 10);
+
+		Rect rect = new Rect(indentSpacing, tempRect.y, position.width - indentSpacing - 100, 20);
+		//Rect rect = new Rect(indentSpacing + 15,tempRect.y, position.width - indentSpacing - 70, 20);
+		float unit = rect.width / maxLimit;
+
+
+		//fillWidth += (rect.width/maxLimitFloat);
+		//fillLeftPos -= (rect.width/maxLimitFloat);
+
+		// Border
+		GUI.Box(rect, "", "ProgressBarBack");
+
+		// Overlay
+		GUI.Box(new Rect(rect.x, rect.y, unit * value + rect.x, rect.height), new GUIContent(), "ProgressBarBar");
+
+		// Text
+		//GUIStyle centeredStyle = GUI.skin.GetStyle("Label");
+		//centeredStyle.alignment = TextAnchor.UpperCenter;
+
+		GUIStyle labelStyle = new GUIStyle();
+		labelStyle.alignment = TextAnchor.UpperCenter;
+		GUI.Label(rect, "Active: " + Mathf.Floor(value), labelStyle);
+		labelStyle.alignment = TextAnchor.MiddleCenter;
+
+		// Slider
+		rect.y += 10;
+		rect.x = indentLevel * 10;
+		rect.width = (position.width - (indentLevel * 10) - 100);
+
+		value = EditorGUI.IntSlider(rect, value, minLimit, maxLimit);
 
 		tempRect = GUILayoutUtility.GetRect(1, 20);
 	}
@@ -494,6 +820,8 @@ public class MoveEditorWindow : EditorWindow
 		AnimationMode.SampleAnimationClip(gameObject, move.animMap.clip, timer);
 		AnimationMode.EndSampling();
 
+		Drawer.frame = (int)(timer * FPS);
+
 		//Move.DrawHitbox(move.hitCollection[0], gameObject.transform);
 
 		/*
@@ -506,7 +834,7 @@ public class MoveEditorWindow : EditorWindow
 			SceneView.RepaintAll();
 		}
 		*/
-		print((timer * FPS).ToString());
+		//print((timer * FPS).ToString());
 		if (timer * FPS > TotalFrames)
         {
 			timer = 0;
@@ -514,19 +842,6 @@ public class MoveEditorWindow : EditorWindow
 				isPlaying = false;
 		}
 		timer += Time.deltaTime;
-	}
-
-	void OnDrawGizmos()
-	{
-#if UNITY_EDITOR
-		if (drawHitboxes && move.hitCollection.Length > 0)
-		{
-			foreach (Hit hit in move.hitCollection.Where(x => x.frameStart <= timer * FPS && x.frameEnd >= timer * FPS))
-			{
-				Gizmos.DrawWireCube((Vector3)hit.Pos + gameObject.transform.position, hit.Size);
-			}
-		}
-#endif
 	}
 
 	public void OnInspectorUpdate()

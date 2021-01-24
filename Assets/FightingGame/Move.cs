@@ -369,6 +369,69 @@ public class Hit
 
     public int frameStart;
     public int frameEnd;
+
+    [SerializeField] private bool _isMultiHit;
+    public bool isMultiHit
+    {
+        get { return _isMultiHit; }
+        set
+        {
+            _isMultiHit = value;
+            CalculateMultiHitFrames();
+        }
+    }
+    public int multiHitTimes;
+    public int multiHitDelay;
+    public int multiHitActiveFrames;
+
+    [SerializeField] private int[] _multiHitFrameStart;
+    [SerializeField] private int[] _multiHitFrameEnd;
+
+    public int FrameStart { get { return frameStart; } }
+    public int FrameEnd { get { return frameEnd; } }
+
+    public int[] MultiFrameStart { get { return _multiHitFrameStart; } }
+    public int[] MultiFrameEnd { get { return _multiHitFrameEnd; } }
+
+    public void CalculateMultiHitFrames()
+    {
+        if (isMultiHit)
+        {
+            HashSet<Vector2Int> fillBounds = new HashSet<Vector2Int>();
+
+            for (int time = 1; time <= multiHitTimes; time++)
+            {
+                Vector2Int vec = new Vector2Int();
+
+                vec.x = frameStart + (time - 1) * multiHitDelay + (time - 1) * multiHitActiveFrames;
+                vec.y = frameStart + time * multiHitActiveFrames - 1 + (time - 1) * multiHitDelay;
+
+                fillBounds.Add(vec);
+            }
+
+            _multiHitFrameStart = new int[fillBounds.Count];
+            _multiHitFrameEnd = new int[fillBounds.Count];
+
+            Vector2Int[] arr = fillBounds.ToArray();
+            for (int i = 0; i < arr.Length; i++)
+            {
+                _multiHitFrameStart[i] = arr[i].x;
+                _multiHitFrameEnd[i] = arr[i].y;
+            }
+        }
+        else
+        {
+            _multiHitFrameStart = null;
+            _multiHitFrameEnd = null;
+
+            /*
+            multiHitTimes = 0;
+            multiHitDelay = 0;
+            multiHitActiveFrames = 0;
+            */
+        }
+    }
+
     public Rect bounds;
     public float damage;
 

@@ -6,6 +6,7 @@ public class HitboxDrawer : MonoBehaviour
 {
     public Move move;
     public int frame;
+    public bool drawHitboxes = true;
 
     private Hit current(int index)
     {
@@ -14,34 +15,51 @@ public class HitboxDrawer : MonoBehaviour
 
     private void OnDrawGizmos()
     {
-        if (move != null && move.hitCollection != null)
+        if (drawHitboxes && move != null && move.hitCollection != null)
         {
             for (int i = 0; i < move.hitCollection.Length; i++)
             {
-                if (current(i).frameStart <= frame && current(i).frameEnd >= frame)
+                if (current(i).isMultiHit)
                 {
-                    switch (current(i).priority)
+                    List<int> start = new List<int>(current(i).MultiFrameStart);
+                    List<int> end = new List<int>(current(i).MultiFrameEnd);
+                    for (int j = 0; j < start.Count; j++)
                     {
-                        case int n when (n == 0):
-                            Gizmos.color = Color.red;
-                            break;
-                        case int n when (n == 1):
-                            Gizmos.color = Color.blue;
-                            break;
-                        case int n when (n == 2):
-                            Gizmos.color = Color.magenta;
-                            break;
-                        case int n when (n >= 3):
-                            Gizmos.color = Color.green;
-                            break;
-                        default:
-                            break;
+                        if (start[j] <= frame && end[j] >= frame)
+                        {
+                            DrawHitbox(current(i));
+                        }
                     }
-
-                    Vector2 pos = current(i).Pos + (current(i).follow == null ? (Vector2)gameObject.transform.position : (Vector2)current(i).follow.position);
-                    Gizmos.DrawWireCube(pos, current(i).Size);
+                }
+                else if (current(i).frameStart <= frame && current(i).frameEnd >= frame)
+                {
+                    DrawHitbox(current(i));
                 }
             }
         }
+    }
+
+    private void DrawHitbox(Hit hitbox)
+    {
+        switch (hitbox.priority)
+        {
+            case int n when (n == 0):
+                Gizmos.color = Color.red;
+                break;
+            case int n when (n == 1):
+                Gizmos.color = Color.blue;
+                break;
+            case int n when (n == 2):
+                Gizmos.color = Color.magenta;
+                break;
+            case int n when (n >= 3):
+                Gizmos.color = Color.green;
+                break;
+            default:
+                break;
+        }
+
+        Vector2 pos = hitbox.Pos + (hitbox.follow == null ? (Vector2)gameObject.transform.position : (Vector2)hitbox.follow.position);
+        Gizmos.DrawWireCube(pos, hitbox.Size);
     }
 }

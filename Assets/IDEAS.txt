@@ -5,3 +5,13 @@ Fighting game
 Hitbox system
 Kirby Airride ripoff
 Cave story ripoff
+
+
+
+
+
+FIGHTING GAME TODO
+Hit properties (ex throw, hit, block)
+Projectile
+Reset collisions marker
+Move Linking

@@ -10,9 +10,9 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: be7e3e9a7d4e81a4d8b933a4d7127ea2, type: 3}
-  m_Name: SpecialMove
+  m_Name: New Move
   m_EditorClassIdentifier: 
-  moveName: Special Move
+  moveName: gadad
   description: 
   clip: {fileID: 0}
   animationStateName: 
@@ -22,7 +22,7 @@ MonoBehaviour:
   _animationFullNameHash: 0
   animMap:
     animationMaps: []
-    clip: {fileID: 7400000, guid: 6bbe535597e729941a1d361d2c71fc37, type: 2}
+    clip: {fileID: 6374613629039001740, guid: d3b20e0b5bc11034cace0771f0ce2fde, type: 3}
     animatorStateName: 
     layerNumber: 0
   _animationSpeed: 0
@@ -31,29 +31,41 @@ MonoBehaviour:
   hitCollection:
   - priority: 0
     follow: {fileID: 0}
-    frameStart: 13
-    frameEnd: 41
+    frameStart: 34
+    frameEnd: 53
+    _isMultiHit: 1
+    multiHitTimes: 6
+    multiHitDelay: 2
+    multiHitActiveFrames: 1
+    _multiHitFrameStart: 2200000025000000280000002b0000002e00000031000000
+    _multiHitFrameEnd: 2200000025000000280000002b0000002e00000031000000
     bounds:
       serializedVersion: 2
-      x: 0
-      y: 0
-      width: 1
-      height: 1
+      x: 0.89
+      y: 0.85
+      width: 0.83
+      height: 0.66
     damage: 0
-    hitboxEditorToggle: 1
+    hitboxEditorToggle: 0
     isHit: []
   - priority: 0
     follow: {fileID: 0}
-    frameStart: 0
-    frameEnd: 1
+    frameStart: 52
+    frameEnd: 53
+    _isMultiHit: 0
+    multiHitTimes: 0
+    multiHitDelay: 0
+    multiHitActiveFrames: 0
+    _multiHitFrameStart: 
+    _multiHitFrameEnd: 
     bounds:
       serializedVersion: 2
-      x: 0
-      y: 0
-      width: 0
-      height: 0
+      x: 2
+      y: 2
+      width: 3.5
+      height: 3.45
     damage: 0
-    hitboxEditorToggle: 1
+    hitboxEditorToggle: 0
     isHit: []
   fixedSpeed: 0
   isHit: []
