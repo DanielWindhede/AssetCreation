@@ -186,6 +186,7 @@ public class FrameCheckerMulti
         return CurrentFrameApproximation(_animator, CurrentClip(currentState));
     }
 
+    /*
     public void CheckFrames(string currentState)
     {
         if (_lastFrame)
@@ -213,7 +214,7 @@ public class FrameCheckerMulti
             _lastFrame = true; // This is here so we don't skip the last frame
         }
     }
-
+    */
 
     public static bool IsActive(Animator animator, Move currentState)
     {

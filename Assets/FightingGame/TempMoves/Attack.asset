@@ -17,30 +17,19 @@ MonoBehaviour:
   clip: {fileID: 7400000, guid: 6bbe535597e729941a1d361d2c71fc37, type: 2}
   animationStateName: attack
   layerNumber: 0
-  hitFrameStart: 21
-  hitFrameEnd: 25
   _animationFullNameHash: 1156809592
-  animMap:
-    animationMaps:
-    - frame: 0
-      boneID: 0
-    clip: {fileID: 6374613629039001740, guid: d3b20e0b5bc11034cace0771f0ce2fde, type: 3}
-    animatorStateName: 
-    layerNumber: 0
   _animationSpeed: 0
-  fps: 0
-  wrapMode: 0
   hitCollection:
   - priority: 0
     follow: {fileID: 0}
-    frameStart: 64
+    frameStart: 32
     frameEnd: 85
     _isMultiHit: 1
     multiHitTimes: 4
     multiHitDelay: 2
     multiHitActiveFrames: 3
-    _multiHitFrameStart: 40000000450000004a0000004f000000
-    _multiHitFrameEnd: 42000000470000004c00000051000000
+    _multiHitFrameStart: 20000000250000002a0000002f000000
+    _multiHitFrameEnd: 22000000270000002c00000031000000
     bounds:
       serializedVersion: 2
       x: 1.74
@@ -52,8 +41,8 @@ MonoBehaviour:
     isHit: []
   - priority: 0
     follow: {fileID: 0}
-    frameStart: 46
-    frameEnd: 48
+    frameStart: 23
+    frameEnd: 24
     _isMultiHit: 0
     multiHitTimes: 1
     multiHitDelay: 0
@@ -71,3 +60,4 @@ MonoBehaviour:
     isHit: []
   fixedSpeed: 0
   isHit: []
+  currentFrame: 0

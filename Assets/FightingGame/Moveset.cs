@@ -24,18 +24,27 @@ public class Moveset : MonoBehaviour, IFrameCheckHandler
         _currentState = stateName;
         _animator.Play(_currentState);
         moves[_currentState].DoEnter();
+
+        GetComponent<HitboxDrawer>().move = moves[_currentState]; // TODO
     }
 
     public int currentFrame;
+
+    
 
     public void Initialize()
     {
         _animator = GetComponent<Animator>();
         moves = new Dictionary<string, Move>();
+
+        GetComponent<HitboxDrawer>().inEditorDraw = false; // TODO
+
         foreach (Move m in _moveFill)
         {
-            moves.Add(m.animationStateName, m);
-            moves[m.animationStateName].Initialize(_animator, this);
+            Move instance = Instantiate(m);
+            instance.currentFrame = 0;
+            moves.Add(instance.animationStateName, instance);
+            moves[instance.animationStateName].Initialize(_animator, this);
         }
         ChangeState("idle");
     }

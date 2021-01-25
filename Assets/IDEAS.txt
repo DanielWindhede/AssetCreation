@@ -15,3 +15,5 @@ Hit properties (ex throw, hit, block)
 Projectile
 Reset collisions marker
 Move Linking
+
+GENERATED ANIMATOR CONTROLLER WHEN CREATING CHARACTER IN THE MOVE EDITOR WINDOW

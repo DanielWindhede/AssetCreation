@@ -115,14 +115,14 @@ public class Move : ScriptableObject
     public AnimationClip clip;
     public string animationStateName;
     public int layerNumber;
-    public int hitFrameStart;
-    public int hitFrameEnd;
+    //public int hitFrameStart;
+    //public int hitFrameEnd;
     public int _animationFullNameHash;
 
-    public SerializedAnimationMap animMap = new SerializedAnimationMap();
+    //public SerializedAnimationMap animMap = new SerializedAnimationMap();
     public float _animationSpeed;
-    public int fps;
-    public WrapMode wrapMode;
+    //public int fps;
+    //public WrapMode wrapMode;
     public Hit[] hitCollection;
     public bool fixedSpeed;
 
@@ -132,8 +132,8 @@ public class Move : ScriptableObject
 
 
     LayerMask mask = 0b1;
-    private HashSet<Hit> _activeHitboxes;
-    private Dictionary<int, List<Hit>> _hitboxes;
+    public HashSet<Hit> activeHitboxes;
+    private HashSet<Hit> _hitboxes;
     private Moveset _parent;
     private Animator _animator;
 
@@ -144,8 +144,8 @@ public class Move : ScriptableObject
     {
         _parent = parent;
         _animator = animator;
-        _hitboxes = new Dictionary<int, List<Hit>>();
-        _activeHitboxes = new HashSet<Hit>();
+        _hitboxes = new HashSet<Hit>();
+        activeHitboxes = new HashSet<Hit>();
 
         _alreadyHit = new HashSet<GameObject>();
         _hitTimes = new List<Hit>();
@@ -158,50 +158,91 @@ public class Move : ScriptableObject
 
         foreach (Hit hit in hitCollection)
         {
-            if (!_hitboxes.ContainsKey(hit.frameStart))
-                _hitboxes.Add(hit.frameStart, new List<Hit>());
-            _hitboxes[hit.frameStart].Add(hit);
-
-            if (!_hitboxes.ContainsKey(hit.frameEnd))
-                _hitboxes.Add(hit.frameEnd, new List<Hit>());
-            _hitboxes[hit.frameEnd].Add(hit);
+            if (hit.isMultiHit)
+            {
+                foreach (int f in hit.MultiFrameStart)
+                {
+                    AddHitboxToList(hit, ref _hitboxes);
+                }
+            }
+            else
+            {
+                AddHitboxToList(hit, ref _hitboxes);
+            }
         }
+
+        currentFrame = 0;
     }
+
+    private void AddHitboxToList(Hit hit, ref HashSet<Hit> list)
+    {
+        list.Add(hit);
+        /*
+        if (!list.ContainsKey(frame))
+            _hitboxes.Add(frame, new List<Hit>());
+        _hitboxes[frame].Add(hit);
+        */
+    }
+
 
     public int CurrentFrameApproximation()
     {
+        if (_animator.GetCurrentAnimatorStateInfo(layerNumber).fullPathHash != _animationFullNameHash)
+            return 0;
+
         if (_animator.GetCurrentAnimatorStateInfo(layerNumber).loop)
             return (int)(_animator.normalizedTimeLooping(layerNumber) * TotalFrames);
         else
             return (int)(_animator.normalizedTime(layerNumber) * TotalFrames);
     }
 
+    public int currentFrame;
     public void DoFixedUpdate()
     {
-        if (_hitboxes.Keys.Count > 0) // small optimization
+        if (_hitboxes.Count > 0) // small optimization
         {
-            int currentFrame = CurrentFrameApproximation();
+            currentFrame = CurrentFrameApproximation();
 
-            if (_hitboxes.ContainsKey(currentFrame))
-            {
-                foreach (Hit hit in _hitboxes[currentFrame])
-                {
-                    if (hit.frameStart == currentFrame)
-                        _activeHitboxes.Add(hit);
-                    else if (hit.frameEnd == currentFrame)
-                        _activeHitboxes.Remove(hit);
-                }
-            }
+            DoHitboxActivation(currentFrame);
+            DoHitboxDeactivation(currentFrame);
 
             DoCollisionCheck();
             DoDebug();
         }
     }
 
+    private void DoHitboxActivation(int currentFrame)
+    {
+        // Regular hit
+        foreach (Hit hit in _hitboxes.Where(x => x.FrameStart == currentFrame && !x.isMultiHit))
+        {
+            if (hit.frameStart == currentFrame)
+                activeHitboxes.Add(hit);
+        }
+
+        // Multihit
+        foreach (Hit hit in _hitboxes.Where(x => x.MultiFrameStart.Contains(currentFrame) && x.isMultiHit))
+        {
+            for (int i = 0; i < hit.MultiFrameStart.Length; i++)
+            {
+                if (hit.MultiFrameStart[i] == currentFrame)
+                {
+                    Hit hitbox = new Hit();
+                    hitbox.GetMultiHitValue(hit, i);
+                    activeHitboxes.Add(hitbox);
+                }
+            }
+        }
+    }
+
+    private void DoHitboxDeactivation(int currentFrame) // TODO: Optimization
+    {
+        activeHitboxes.RemoveWhere(x => x.FrameEnd + 1 == currentFrame); // inclusive
+    }
 
     private void DoCollisionCheck()
     {
-        foreach (Hit hit in _activeHitboxes)
+        foreach (Hit hit in activeHitboxes)
         {
             Transform t = hit.follow != null ? hit.follow : _parent.transform;
             hit.isHit = Physics2D.OverlapBoxAll(t.TransformPoint(hit.Pos), hit.Size, 0, mask);
@@ -250,7 +291,7 @@ public class Move : ScriptableObject
     private void DoDebug()
     {
         
-        foreach (Hit hit in _activeHitboxes)
+        foreach (Hit hit in activeHitboxes)
         {
             DrawHitbox(hit, hit.follow != null ? hit.follow : _parent.transform);
         }
@@ -280,12 +321,14 @@ public class Move : ScriptableObject
 
     public void DoEnter()
     {
-        _activeHitboxes.Clear();
+        activeHitboxes.Clear();
+        currentFrame = 0;
     }
 
     public void DoExit()
     {
-        _activeHitboxes.Clear();
+        activeHitboxes.Clear();
+        currentFrame = 0;
     }
 
     
@@ -300,6 +343,7 @@ public class Move : ScriptableObject
             */
     }
 }
+/*
 [System.Serializable]
 public class SerializedAnimationMap
 {
@@ -353,6 +397,7 @@ public class SerializedAnimationMap
         return (percentage > PercentageOnFrame(_totalFrames - 1));
     }
 }
+
 [System.Serializable]
 public class AnimationMap
 {
@@ -360,6 +405,7 @@ public class AnimationMap
     public int boneID;
 }
 
+*/
 
 [System.Serializable]
 public class Hit
@@ -392,6 +438,15 @@ public class Hit
 
     public int[] MultiFrameStart { get { return _multiHitFrameStart; } }
     public int[] MultiFrameEnd { get { return _multiHitFrameEnd; } }
+
+    public Rect bounds;
+    public float damage;
+
+    public bool hitboxEditorToggle;
+
+    [HideInInspector] public Collider2D[] isHit;
+    public Vector2 Pos { get { return new Vector2(bounds.x, bounds.y); } }
+    public Vector2 Size { get { return new Vector2(bounds.width, bounds.height); } }
 
     public void CalculateMultiHitFrames()
     {
@@ -432,12 +487,16 @@ public class Hit
         }
     }
 
-    public Rect bounds;
-    public float damage;
+    public void GetMultiHitValue(Hit hit, int multiHitIndex)
+    {
+        this.priority = hit.priority;
+        this.follow = hit.follow;
 
-    public bool hitboxEditorToggle;
+        this.frameStart = hit.MultiFrameStart[multiHitIndex];
+        this.frameEnd = hit.MultiFrameEnd[multiHitIndex];
+        this.bounds = hit.bounds;
+        this.damage = hit.damage;
 
-    [HideInInspector] public Collider2D[] isHit;
-    public Vector2 Pos { get { return new Vector2(bounds.x, bounds.y); } }
-    public Vector2 Size { get { return new Vector2(bounds.width, bounds.height); } }
+        this.hitboxEditorToggle = hit.hitboxEditorToggle;
+    }
 }

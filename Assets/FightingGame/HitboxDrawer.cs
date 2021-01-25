@@ -7,6 +7,7 @@ public class HitboxDrawer : MonoBehaviour
     public Move move;
     public int frame;
     public bool drawHitboxes = true;
+    public bool inEditorDraw = true;
 
     private Hit current(int index)
     {
@@ -17,23 +18,35 @@ public class HitboxDrawer : MonoBehaviour
     {
         if (drawHitboxes && move != null && move.hitCollection != null)
         {
-            for (int i = 0; i < move.hitCollection.Length; i++)
+            if (!inEditorDraw)
             {
-                if (current(i).isMultiHit)
+                foreach (Hit hitbox in move.activeHitboxes)
                 {
-                    List<int> start = new List<int>(current(i).MultiFrameStart);
-                    List<int> end = new List<int>(current(i).MultiFrameEnd);
-                    for (int j = 0; j < start.Count; j++)
+                    DrawHitbox(hitbox);
+                }
+            }
+            else
+            {
+                for (int i = 0; i < move.hitCollection.Length; i++)
+                {
+                    if (current(i).isMultiHit)
                     {
-                        if (start[j] <= frame && end[j] >= frame)
+                        List<int> start = new List<int>(current(i).MultiFrameStart);
+                        List<int> end = new List<int>(current(i).MultiFrameEnd);
+
+                        for (int j = 0; j < start.Count; j++)
                         {
-                            DrawHitbox(current(i));
+                            if (start[j] <= frame && end[j] >= frame)
+                            {
+                                DrawHitbox(current(i));
+                            }
+                            //print("Current: " + f + ", Start: " + start[j] + ", End; " + end[j]);
                         }
                     }
-                }
-                else if (current(i).frameStart <= frame && current(i).frameEnd >= frame)
-                {
-                    DrawHitbox(current(i));
+                    else if (current(i).frameStart <= frame && current(i).frameEnd >= frame)
+                    {
+                        DrawHitbox(current(i));
+                    }
                 }
             }
         }
@@ -61,5 +74,6 @@ public class HitboxDrawer : MonoBehaviour
 
         Vector2 pos = hitbox.Pos + (hitbox.follow == null ? (Vector2)gameObject.transform.position : (Vector2)hitbox.follow.position);
         Gizmos.DrawWireCube(pos, hitbox.Size);
+        print("drawing...");
     }
 }

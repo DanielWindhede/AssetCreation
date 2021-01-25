@@ -48,7 +48,7 @@ public class MoveEditorWindow : EditorWindow
 	private float ScrubTime { get { return (float)SmoothScrubFrames / (float)FPS; } }
 
 	private int CurrentFrame { get { return (int)_smoothScrubFrames; } }
-	private int TotalFrames { get { return (int)(move.animMap.clip.length * FPS); } }
+	private int TotalFrames { get { return (int)(move.clip.length * FPS); } }
 
 
 	private const int FPS = 60;
@@ -86,7 +86,7 @@ public class MoveEditorWindow : EditorWindow
 				AnimationMode.StartAnimationMode();
 			}
 			AnimationMode.BeginSampling();
-			AnimationMode.SampleAnimationClip(gameObject, move.animMap.clip, ScrubTime);
+			AnimationMode.SampleAnimationClip(gameObject, move.clip, ScrubTime);
 			AnimationMode.EndSampling();
 		}
 	}
@@ -94,7 +94,6 @@ public class MoveEditorWindow : EditorWindow
 	string title = "Select a GameObject";
 	void runAnimation()
 	{
-		timer = 0;
 		isPlaying = true;
     }
 
@@ -151,8 +150,8 @@ public class MoveEditorWindow : EditorWindow
 
 
 		move.moveName = EditorGUILayout.TextField("Move Name (Unique Id):", move.moveName);
-		move.animMap.clip = (AnimationClip)EditorGUILayout.ObjectField("Animation Clip:", move.animMap.clip, typeof(AnimationClip), true);
-		if (move.animMap.clip == null)
+		move.clip = (AnimationClip)EditorGUILayout.ObjectField("Animation Clip:", move.clip, typeof(AnimationClip), true);
+		if (move.clip == null)
 		{
 			return;
 		}
@@ -183,9 +182,9 @@ public class MoveEditorWindow : EditorWindow
 					EditorGUILayout.LabelField("Frame Advance", new GUIStyle() { alignment = TextAnchor.MiddleCenter, fontStyle = FontStyle.Bold });
 
 					if (useSmoothScrubbing)
-						SmoothScrubFrames = EditorGUILayout.Slider(SmoothScrubFrames, 0, (int)(move.animMap.clip.length * FPS));
+						SmoothScrubFrames = EditorGUILayout.Slider(SmoothScrubFrames, 0, (int)(move.clip.length * FPS));
 					else
-						ScrubFrames = EditorGUILayout.IntSlider((int)ScrubFrames, 0, (int)(move.animMap.clip.length * FPS));
+						ScrubFrames = EditorGUILayout.IntSlider((int)ScrubFrames, 0, (int)(move.clip.length * FPS));
 
 					EditorGUILayout.BeginHorizontal();
 					{
@@ -256,7 +255,7 @@ public class MoveEditorWindow : EditorWindow
 										else
 										{
 											StyledMinMaxSlider(ref move.hitCollection[i].frameStart, ref move.hitCollection[i].frameEnd, 0,
-															  (int)(move.animMap.clip.length * FPS), EditorGUI.indentLevel);
+															  (int)(move.clip.length * FPS), EditorGUI.indentLevel);
 										}
 
 										GUILayout.Label("Bounds");
@@ -815,9 +814,10 @@ public class MoveEditorWindow : EditorWindow
 		if (!AnimationMode.InAnimationMode())
 		{
 			AnimationMode.StartAnimationMode();
+			timer = 0;
 		}
 		AnimationMode.BeginSampling();
-		AnimationMode.SampleAnimationClip(gameObject, move.animMap.clip, timer);
+		AnimationMode.SampleAnimationClip(gameObject, move.clip, timer);
 		AnimationMode.EndSampling();
 
 		Drawer.frame = (int)(timer * FPS);
