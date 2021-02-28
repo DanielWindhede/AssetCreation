@@ -5,7 +5,6 @@ using UnityEngine.SceneManagement;
 
 namespace Fami.SceneTransition
 {
-
     public class SceneTransitionTest : MonoBehaviour
     {
         [SerializeField] private Animator transition;
