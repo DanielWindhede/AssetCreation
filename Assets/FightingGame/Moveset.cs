@@ -37,6 +37,9 @@ public class Moveset : MonoBehaviour, IFrameCheckHandler
         _animator = GetComponent<Animator>();
         moves = new Dictionary<string, Move>();
 
+        if (_moveFill == null)
+            _moveFill = new List<Move>();
+
         GetComponent<HitboxDrawer>().inEditorDraw = false; // TODO
 
         foreach (Move m in _moveFill)
@@ -46,7 +49,7 @@ public class Moveset : MonoBehaviour, IFrameCheckHandler
             moves.Add(instance.animationStateName, instance);
             moves[instance.animationStateName].Initialize(_animator, this);
         }
-        ChangeState("idle");
+        ChangeState("idle"); // TODO
     }
 
     public void DoFixedUpdate()

@@ -8,4 +8,6 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/UFE/Scenes/TrainingRoom.unity
     guid: a4f99dda2dd9d4442b85a6936f4bb0d9
-  m_configObjects: {}
+  m_configObjects:
+    com.unity.input.settings: {fileID: 11400000, guid: a813ed9bed13af640a6c325a092cb0f5,
+      type: 2}

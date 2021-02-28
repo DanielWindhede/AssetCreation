@@ -19,14 +19,6 @@ public class @FightingGameInputActions : IInputActionCollection, IDisposable
             ""id"": ""9a55180f-fcd7-4683-a827-2db36fc140f5"",
             ""actions"": [
                 {
-                    ""name"": ""Move"",
-                    ""type"": ""Value"",
-                    ""id"": ""b6cc53f8-c8f1-49cd-ae6e-67f2a74dd269"",
-                    ""expectedControlType"": ""Axis"",
-                    ""processors"": """",
-                    ""interactions"": """"
-                },
-                {
                     ""name"": ""Attack"",
                     ""type"": ""Button"",
                     ""id"": ""020551d3-f783-427a-9001-545349b415a6"",
@@ -47,6 +39,14 @@ public class @FightingGameInputActions : IInputActionCollection, IDisposable
                     ""type"": ""Button"",
                     ""id"": ""aff2e4ad-2978-42a4-9e92-4f0ba45f30c7"",
                     ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """"
+                },
+                {
+                    ""name"": ""Move"",
+                    ""type"": ""Value"",
+                    ""id"": ""ecced8f9-19d9-4d0d-89fa-aa1cd3792ac5"",
+                    ""expectedControlType"": ""Vector2"",
                     ""processors"": """",
                     ""interactions"": """"
                 }
@@ -97,70 +97,15 @@ public class @FightingGameInputActions : IInputActionCollection, IDisposable
                     ""isPartOfComposite"": false
                 },
                 {
-                    ""name"": ""DigitalX"",
-                    ""id"": ""7bb1bbe7-3158-4473-8a59-fd2067b39341"",
-                    ""path"": ""1DAxis"",
-                    ""interactions"": """",
-                    ""processors"": """",
-                    ""groups"": ""PlayerControl"",
-                    ""action"": ""Move"",
-                    ""isComposite"": true,
-                    ""isPartOfComposite"": false
-                },
-                {
-                    ""name"": ""negative"",
-                    ""id"": ""41694a50-13ee-4228-9573-cd855a2c5b10"",
-                    ""path"": ""<Gamepad>/dpad/left"",
-                    ""interactions"": """",
-                    ""processors"": """",
-                    ""groups"": ""PlayerControl"",
-                    ""action"": ""Move"",
-                    ""isComposite"": false,
-                    ""isPartOfComposite"": true
-                },
-                {
-                    ""name"": ""positive"",
-                    ""id"": ""206f25dc-1fbd-4413-b242-81dd49ac9e2f"",
-                    ""path"": ""<Gamepad>/dpad/right"",
-                    ""interactions"": """",
-                    ""processors"": """",
-                    ""groups"": ""PlayerControl"",
-                    ""action"": ""Move"",
-                    ""isComposite"": false,
-                    ""isPartOfComposite"": true
-                },
-                {
-                    ""name"": ""DigitalY"",
-                    ""id"": ""3c6f9884-c5b0-4cb3-8246-c13a7fead204"",
-                    ""path"": ""1DAxis"",
+                    ""name"": """",
+                    ""id"": ""f5d43fd8-9009-4823-893e-895955c0731b"",
+                    ""path"": ""<Gamepad>/dpad"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
                     ""action"": ""Move"",
-                    ""isComposite"": true,
+                    ""isComposite"": false,
                     ""isPartOfComposite"": false
-                },
-                {
-                    ""name"": ""Negative"",
-                    ""id"": ""36bec3c1-86d9-4427-a66f-1bb8f6b23c7e"",
-                    ""path"": ""<Gamepad>/dpad/down"",
-                    ""interactions"": """",
-                    ""processors"": """",
-                    ""groups"": ""PlayerControl"",
-                    ""action"": ""Move"",
-                    ""isComposite"": false,
-                    ""isPartOfComposite"": true
-                },
-                {
-                    ""name"": ""Positive"",
-                    ""id"": ""cb95d4da-9802-41a6-bf22-7082bfe5850d"",
-                    ""path"": ""<Gamepad>/dpad/up"",
-                    ""interactions"": """",
-                    ""processors"": """",
-                    ""groups"": ""PlayerControl"",
-                    ""action"": ""Move"",
-                    ""isComposite"": false,
-                    ""isPartOfComposite"": true
                 }
             ]
         }
@@ -169,16 +114,27 @@ public class @FightingGameInputActions : IInputActionCollection, IDisposable
         {
             ""name"": ""PlayerControl"",
             ""bindingGroup"": ""PlayerControl"",
-            ""devices"": []
+            ""devices"": [
+                {
+                    ""devicePath"": ""<Gamepad>"",
+                    ""isOptional"": true,
+                    ""isOR"": false
+                },
+                {
+                    ""devicePath"": ""<SwitchProControllerHID>"",
+                    ""isOptional"": true,
+                    ""isOR"": false
+                }
+            ]
         }
     ]
 }");
         // Actions
         m_Actions = asset.FindActionMap("Actions", throwIfNotFound: true);
-        m_Actions_Move = m_Actions.FindAction("Move", throwIfNotFound: true);
         m_Actions_Attack = m_Actions.FindAction("Attack", throwIfNotFound: true);
         m_Actions_Special = m_Actions.FindAction("Special", throwIfNotFound: true);
         m_Actions_Jump = m_Actions.FindAction("Jump", throwIfNotFound: true);
+        m_Actions_Move = m_Actions.FindAction("Move", throwIfNotFound: true);
     }
 
     public void Dispose()
@@ -228,18 +184,18 @@ public class @FightingGameInputActions : IInputActionCollection, IDisposable
     // Actions
     private readonly InputActionMap m_Actions;
     private IActionsActions m_ActionsActionsCallbackInterface;
-    private readonly InputAction m_Actions_Move;
     private readonly InputAction m_Actions_Attack;
     private readonly InputAction m_Actions_Special;
     private readonly InputAction m_Actions_Jump;
+    private readonly InputAction m_Actions_Move;
     public struct ActionsActions
     {
         private @FightingGameInputActions m_Wrapper;
         public ActionsActions(@FightingGameInputActions wrapper) { m_Wrapper = wrapper; }
-        public InputAction @Move => m_Wrapper.m_Actions_Move;
         public InputAction @Attack => m_Wrapper.m_Actions_Attack;
         public InputAction @Special => m_Wrapper.m_Actions_Special;
         public InputAction @Jump => m_Wrapper.m_Actions_Jump;
+        public InputAction @Move => m_Wrapper.m_Actions_Move;
         public InputActionMap Get() { return m_Wrapper.m_Actions; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
@@ -249,9 +205,6 @@ public class @FightingGameInputActions : IInputActionCollection, IDisposable
         {
             if (m_Wrapper.m_ActionsActionsCallbackInterface != null)
             {
-                @Move.started -= m_Wrapper.m_ActionsActionsCallbackInterface.OnMove;
-                @Move.performed -= m_Wrapper.m_ActionsActionsCallbackInterface.OnMove;
-                @Move.canceled -= m_Wrapper.m_ActionsActionsCallbackInterface.OnMove;
                 @Attack.started -= m_Wrapper.m_ActionsActionsCallbackInterface.OnAttack;
                 @Attack.performed -= m_Wrapper.m_ActionsActionsCallbackInterface.OnAttack;
                 @Attack.canceled -= m_Wrapper.m_ActionsActionsCallbackInterface.OnAttack;
@@ -261,13 +214,13 @@ public class @FightingGameInputActions : IInputActionCollection, IDisposable
                 @Jump.started -= m_Wrapper.m_ActionsActionsCallbackInterface.OnJump;
                 @Jump.performed -= m_Wrapper.m_ActionsActionsCallbackInterface.OnJump;
                 @Jump.canceled -= m_Wrapper.m_ActionsActionsCallbackInterface.OnJump;
+                @Move.started -= m_Wrapper.m_ActionsActionsCallbackInterface.OnMove;
+                @Move.performed -= m_Wrapper.m_ActionsActionsCallbackInterface.OnMove;
+                @Move.canceled -= m_Wrapper.m_ActionsActionsCallbackInterface.OnMove;
             }
             m_Wrapper.m_ActionsActionsCallbackInterface = instance;
             if (instance != null)
             {
-                @Move.started += instance.OnMove;
-                @Move.performed += instance.OnMove;
-                @Move.canceled += instance.OnMove;
                 @Attack.started += instance.OnAttack;
                 @Attack.performed += instance.OnAttack;
                 @Attack.canceled += instance.OnAttack;
@@ -277,6 +230,9 @@ public class @FightingGameInputActions : IInputActionCollection, IDisposable
                 @Jump.started += instance.OnJump;
                 @Jump.performed += instance.OnJump;
                 @Jump.canceled += instance.OnJump;
+                @Move.started += instance.OnMove;
+                @Move.performed += instance.OnMove;
+                @Move.canceled += instance.OnMove;
             }
         }
     }
@@ -292,9 +248,9 @@ public class @FightingGameInputActions : IInputActionCollection, IDisposable
     }
     public interface IActionsActions
     {
-        void OnMove(InputAction.CallbackContext context);
         void OnAttack(InputAction.CallbackContext context);
         void OnSpecial(InputAction.CallbackContext context);
         void OnJump(InputAction.CallbackContext context);
+        void OnMove(InputAction.CallbackContext context);
     }
 }

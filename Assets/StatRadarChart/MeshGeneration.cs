@@ -18,6 +18,12 @@ public struct Stat {
     }
 
     public float GetFraction { get { return _value / 255f; } } // 255 max stat value
+
+    public Stat(string name, int value)
+    {
+        _name = name;
+        _value = value;
+    }
 }
 
 public class MeshGeneration : MonoBehaviour {

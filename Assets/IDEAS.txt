@@ -5,7 +5,7 @@ Fighting game
 Hitbox system
 Kirby Airride ripoff
 Cave story ripoff
-
+Musiksynkroniserade attacker på fiender och windows man kan slå på
 
 
 
