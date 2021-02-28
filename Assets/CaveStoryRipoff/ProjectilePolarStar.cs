@@ -2,43 +2,46 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class ProjectilePolarStar : Projectile
+namespace Fami.CaveStory
 {
-    private bool isDestroyed;
-
-    private float offset;
-    [SerializeField] private float speed = 1.6f; // G.U
-    [SerializeField] private float travelDistance = 3.5f;
-
-    protected override void Awake()
+    public class ProjectilePolarStar : Projectile
     {
-        base.Awake();
-    }
+        private bool isDestroyed;
 
-    protected override void Start()
-    {
-        base.Start();
-    }
+        private float offset;
+        [SerializeField] private float speed = 1.6f; // G.U
+        [SerializeField] private float travelDistance = 3.5f;
 
-    float timer;
-    protected override void Update()
-    {
-        base.Update();
-
-        if (!isDestroyed)
+        protected override void Awake()
         {
-            if (offset > travelDistance)
-            {
-                owner.OnProjectileDestroy(this);
-                isDestroyed = true;
-            }
-            else
-            {
-                Vector2 dir = GetVecFromDirection(Direction);
+            base.Awake();
+        }
 
-                offset += speed * Time.deltaTime;
-                timer += Time.deltaTime;
-                transform.Translate(new Vector3(dir.x, dir.y, 0) * speed * Time.deltaTime);
+        protected override void Start()
+        {
+            base.Start();
+        }
+
+        float timer;
+        protected override void Update()
+        {
+            base.Update();
+
+            if (!isDestroyed)
+            {
+                if (offset > travelDistance)
+                {
+                    owner.OnProjectileDestroy(this);
+                    isDestroyed = true;
+                }
+                else
+                {
+                    Vector2 dir = GetVecFromDirection(Direction);
+
+                    offset += speed * Time.deltaTime;
+                    timer += Time.deltaTime;
+                    transform.Translate(new Vector3(dir.x, dir.y, 0) * speed * Time.deltaTime);
+                }
             }
         }
     }

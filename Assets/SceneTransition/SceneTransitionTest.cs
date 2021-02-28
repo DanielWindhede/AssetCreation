@@ -3,35 +3,42 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-public class SceneTransitionTest : MonoBehaviour
+namespace Fami.SceneTransition
 {
-    [SerializeField] private Animator transition;
-    [SerializeField] private float transitionTime = 1f;
 
-    // Start is called before the first frame update
-    void Start()
+    public class SceneTransitionTest : MonoBehaviour
     {
-        
-    }
+        [SerializeField] private Animator transition;
+        [SerializeField] private float transitionTime = 1f;
 
-    // Update is called once per frame
-    void Update()
-    {
-        if (Input.GetMouseButtonDown(0)) {
-            LoadNextLevel();
+        // Start is called before the first frame update
+        void Start()
+        {
+
         }
 
-    }
+        // Update is called once per frame
+        void Update()
+        {
+            if (Input.GetMouseButtonDown(0))
+            {
+                LoadNextLevel();
+            }
 
-    private void LoadNextLevel() {
-        StartCoroutine(LoadLevel(SceneManager.GetActiveScene().buildIndex + 1));
-    }
+        }
 
-    private IEnumerator LoadLevel(int levelIndex) {
-        transition.SetTrigger("Start");
+        private void LoadNextLevel()
+        {
+            StartCoroutine(LoadLevel(SceneManager.GetActiveScene().buildIndex + 1));
+        }
 
-        yield return new WaitForSeconds(transitionTime);
+        private IEnumerator LoadLevel(int levelIndex)
+        {
+            transition.SetTrigger("Start");
 
-        SceneManager.LoadScene(levelIndex);
+            yield return new WaitForSeconds(transitionTime);
+
+            SceneManager.LoadScene(levelIndex);
+        }
     }
 }

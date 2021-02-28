@@ -3,21 +3,24 @@ using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 
-[CustomEditor(typeof(Move))]
-public class MoveEditor : Editor
+namespace Fami.FightingGame
 {
-	private bool showInfo = true;
-	public override void OnInspectorGUI()
+	[CustomEditor(typeof(Move))]
+	public class MoveEditor : Editor
 	{
-		
-		if (GUILayout.Button("Open Move Editor"))
-			MoveEditorWindow.ShowWindow();
-		
-		EditorGUILayout.Space();
+		private bool showInfo = true;
+		public override void OnInspectorGUI()
+		{
 
-		showInfo = GUILayout.Toggle(showInfo, "Show info");
+			if (GUILayout.Button("Open Move Editor"))
+				MoveEditorWindow.ShowWindow();
 
-		if (showInfo)
-			base.OnInspectorGUI();
+			EditorGUILayout.Space();
+
+			showInfo = GUILayout.Toggle(showInfo, "Show info");
+
+			if (showInfo)
+				base.OnInspectorGUI();
+		}
 	}
 }

@@ -2,202 +2,207 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-// DW
-public class HitboxGroupLegacy : MonoBehaviour
+namespace Fami.FightingGame
 {
-    public delegate void OnEnableHitboxes(int id);
-    public event OnEnableHitboxes onEnableHitboxes;
+    // DW
+    public class HitboxGroupLegacy : MonoBehaviour
+    {
+        public delegate void OnEnableHitboxes(int id);
+        public event OnEnableHitboxes onEnableHitboxes;
 
-    public delegate void OnDisableHitboxes(int id);
-    public event OnDisableHitboxes onDisableHitboxes;
+        public delegate void OnDisableHitboxes(int id);
+        public event OnDisableHitboxes onDisableHitboxes;
 
-    //public HitboxEventHandler hitboxEventHandler;
-    public LayerMask targetLayerMask;
+        //public HitboxEventHandler hitboxEventHandler;
+        public LayerMask targetLayerMask;
 
-    [HideInInspector] public List<GameObject> _alreadyHit;
-    private List<HitboxLegacy> _hitTimes;
+        [HideInInspector] public List<GameObject> _alreadyHit;
+        private List<HitboxLegacy> _hitTimes;
 
-    public bool eventLess;
-    public bool enabledByDefault;
-    //private Entity _parentEntity;
+        public bool eventLess;
+        public bool enabledByDefault;
+        //private Entity _parentEntity;
 
-    void Awake() {
-        _alreadyHit = new List<GameObject>();
-        _hitTimes = new List<HitboxLegacy>();
-
-       // eventLess = GetComponentInChildren<HitboxController>() == null ? true : false;
-       /*
-        if (!eventLess)
+        void Awake()
         {
-            if (hitboxEventHandler == null)
-            {
-                Debug.LogWarning("HitboxEventHandler missing! Resorting to finding in parent...", this);
-                hitboxEventHandler = GetComponentInParent<HitboxEventHandler>();
-                if (hitboxEventHandler == null)
-                {
-                    Debug.LogError("Unable to find HitboxEventHandler in parent!", this);
-                }
-                else
-                {
-                    Debug.Log("HitboxEventHandler found. Please add this component as a reference after game session", this);
-                }
-            }
+            _alreadyHit = new List<GameObject>();
+            _hitTimes = new List<HitboxLegacy>();
+
+            // eventLess = GetComponentInChildren<HitboxController>() == null ? true : false;
+            /*
+             if (!eventLess)
+             {
+                 if (hitboxEventHandler == null)
+                 {
+                     Debug.LogWarning("HitboxEventHandler missing! Resorting to finding in parent...", this);
+                     hitboxEventHandler = GetComponentInParent<HitboxEventHandler>();
+                     if (hitboxEventHandler == null)
+                     {
+                         Debug.LogError("Unable to find HitboxEventHandler in parent!", this);
+                     }
+                     else
+                     {
+                         Debug.Log("HitboxEventHandler found. Please add this component as a reference after game session", this);
+                     }
+                 }
+             }
+             else
+             {
+                 EnableEvent(0);
+             }
+            */
+            //_parentEntity = GetComponentInParent<Entity>();
+            enabled = enabledByDefault;
         }
-        else
+
+        public void EnableEvent(int id = 0)
         {
-            EnableEvent(0);
+            if (onEnableHitboxes != null)
+                onEnableHitboxes(id);
+            else
+                Debug.LogWarning("No object is subscribed to the \"onEnableHitboxes\" event!", this);
         }
-       */
-        //_parentEntity = GetComponentInParent<Entity>();
-        enabled = enabledByDefault;
-    }
 
-    public void EnableEvent(int id = 0)
-    {
-        if (onEnableHitboxes != null)
-            onEnableHitboxes(id);
-        else
-            Debug.LogWarning("No object is subscribed to the \"onEnableHitboxes\" event!", this);
-    }
-
-    public void DisableEvent(int id = 0)
-    {
-        if (onDisableHitboxes != null)
-            onDisableHitboxes(id);
-        else
-            Debug.LogWarning("No object is subscribed to the \"onDisableHitboxes\" event!", this);
-    }
-
-    void LateUpdate()
-    {
-        if (!eventLess)
-            HitDetection();
-    }
-
-    private void HitDetection()
-    {
-        /*
-        if (_hitTimes.Count > 0)
+        public void DisableEvent(int id = 0)
         {
-            int highestPriorityIndex = 0;
-            for (int i = 1; i < _hitTimes.Count; i++)
-            {
-                if (_hitTimes[i].priority < _hitTimes[highestPriorityIndex].priority)
-                {
-                    highestPriorityIndex = i;
-                }
-            }
+            if (onDisableHitboxes != null)
+                onDisableHitboxes(id);
+            else
+                Debug.LogWarning("No object is subscribed to the \"onDisableHitboxes\" event!", this);
+        }
 
-            foreach (Collider enemy in _hitTimes[highestPriorityIndex].isHit)
+        void LateUpdate()
+        {
+            if (!eventLess)
+                HitDetection();
+        }
+
+        private void HitDetection()
+        {
+            /*
+            if (_hitTimes.Count > 0)
             {
-                if (enemy != null && !_alreadyHit.Contains(enemy.gameObject))
+                int highestPriorityIndex = 0;
+                for (int i = 1; i < _hitTimes.Count; i++)
                 {
-                    var targetEntity = enemy.gameObject.GetComponent<Entity>();
-                    if (!targetEntity.invulerable) // intangible behavior atm, stöd för båda borde finnas! Man blir samt slagen om invun. tar slut medans man blir träffad
+                    if (_hitTimes[i].priority < _hitTimes[highestPriorityIndex].priority)
                     {
-                        Hitbox hitbox = _hitTimes[highestPriorityIndex];
-                        if (targetEntity == null)
+                        highestPriorityIndex = i;
+                    }
+                }
+
+                foreach (Collider enemy in _hitTimes[highestPriorityIndex].isHit)
+                {
+                    if (enemy != null && !_alreadyHit.Contains(enemy.gameObject))
+                    {
+                        var targetEntity = enemy.gameObject.GetComponent<Entity>();
+                        if (!targetEntity.invulerable) // intangible behavior atm, stöd för båda borde finnas! Man blir samt slagen om invun. tar slut medans man blir träffad
                         {
-                            Debug.LogWarning("Object derived from Entity class is missing! Resorting to find in children...", this);
-                            targetEntity = enemy.gameObject.GetComponentInChildren<Entity>();
+                            Hitbox hitbox = _hitTimes[highestPriorityIndex];
                             if (targetEntity == null)
                             {
-                                Debug.LogError("Object derived from Entity class is missing from \"" + enemy.gameObject.name + "\"!", this);
+                                Debug.LogWarning("Object derived from Entity class is missing! Resorting to find in children...", this);
+                                targetEntity = enemy.gameObject.GetComponentInChildren<Entity>();
+                                if (targetEntity == null)
+                                {
+                                    Debug.LogError("Object derived from Entity class is missing from \"" + enemy.gameObject.name + "\"!", this);
+                                }
+                                else
+                                {
+                                    TakeDamage(targetEntity, hitbox.hitboxValues);
+                                }
                             }
                             else
                             {
                                 TakeDamage(targetEntity, hitbox.hitboxValues);
                             }
+                            _alreadyHit.Add(enemy.gameObject);
                         }
-                        else
-                        {
-                            TakeDamage(targetEntity, hitbox.hitboxValues);
-                        }
-                        _alreadyHit.Add(enemy.gameObject);
                     }
                 }
-            }
 
-            _hitTimes.Clear();
+                _hitTimes.Clear();
+            }
+            */
         }
-        */
-    }
-    /*
-    private void TakeDamage(Entity target, HitboxValues hitbox)
-    {
-        if (_parentEntity != null && _parentEntity.modifier != null)
-            target.TakeDamage(hitbox * _parentEntity.modifier, _parentEntity);
-        else
-            target.TakeDamage(hitbox, _parentEntity);
-
-        if (hitbox.hitstopTime > 0)
+        /*
+        private void TakeDamage(Entity target, HitboxValues hitbox)
         {
-            if (_parentEntity != null && _parentEntity.GetType() == typeof(PlayerRevamp)) // if the player is attacking, temporary solution
-            {
-                GlobalState.state.HitStop(hitbox);
-            }
+            if (_parentEntity != null && _parentEntity.modifier != null)
+                target.TakeDamage(hitbox * _parentEntity.modifier, _parentEntity);
             else
+                target.TakeDamage(hitbox, _parentEntity);
+
+            if (hitbox.hitstopTime > 0)
             {
-                if (hitbox.parryable && target.GetType() == typeof(PlayerRevamp)) // if player is the reciever and is parrying
-                {
-                    if (!(target as PlayerRevamp).isParrying)
-                    {
-                        GlobalState.state.HitStop(hitbox);
-                    }
-                    else
-                    {
-                        // GlobalState.state.HitStop(hitbox.hitstopTime, hitbox); // parry time
-                    }
-                }
-                else
+                if (_parentEntity != null && _parentEntity.GetType() == typeof(PlayerRevamp)) // if the player is attacking, temporary solution
                 {
                     GlobalState.state.HitStop(hitbox);
                 }
+                else
+                {
+                    if (hitbox.parryable && target.GetType() == typeof(PlayerRevamp)) // if player is the reciever and is parrying
+                    {
+                        if (!(target as PlayerRevamp).isParrying)
+                        {
+                            GlobalState.state.HitStop(hitbox);
+                        }
+                        else
+                        {
+                            // GlobalState.state.HitStop(hitbox.hitstopTime, hitbox); // parry time
+                        }
+                    }
+                    else
+                    {
+                        GlobalState.state.HitStop(hitbox);
+                    }
+                }
             }
         }
-    }
-    */
-
-    public void AddHitbox(HitboxLegacy hitbox)
-    {
-        _hitTimes.Add(hitbox);
-        if (eventLess)
-        {
-            HitDetection();
-        }
-    }
-
-    private void OnEnable()
-    {
-        /*
-        if (!eventLess)
-        {
-            hitboxEventHandler.onEnableHitboxes += EnableEvent;
-            hitboxEventHandler.onDisableHitboxes += DisableEvent;
-            hitboxEventHandler.onEndAnim += ResetList;
-        }
-        else
-        {
-            EnableEvent(0);
-        }
         */
-        ResetList();
-    }
 
-    private void OnDisable() {
-        /*
-        if (!eventLess)
+        public void AddHitbox(HitboxLegacy hitbox)
         {
-            hitboxEventHandler.onEnableHitboxes -= EnableEvent;
-            hitboxEventHandler.onDisableHitboxes -= DisableEvent;
-            hitboxEventHandler.onEndAnim -= ResetList;
+            _hitTimes.Add(hitbox);
+            if (eventLess)
+            {
+                HitDetection();
+            }
         }
-        */
-        DisableEvent(0);
-    }
 
-    private void ResetList()
-    {
-        _alreadyHit.Clear();
+        private void OnEnable()
+        {
+            /*
+            if (!eventLess)
+            {
+                hitboxEventHandler.onEnableHitboxes += EnableEvent;
+                hitboxEventHandler.onDisableHitboxes += DisableEvent;
+                hitboxEventHandler.onEndAnim += ResetList;
+            }
+            else
+            {
+                EnableEvent(0);
+            }
+            */
+            ResetList();
+        }
+
+        private void OnDisable()
+        {
+            /*
+            if (!eventLess)
+            {
+                hitboxEventHandler.onEnableHitboxes -= EnableEvent;
+                hitboxEventHandler.onDisableHitboxes -= DisableEvent;
+                hitboxEventHandler.onEndAnim -= ResetList;
+            }
+            */
+            DisableEvent(0);
+        }
+
+        private void ResetList()
+        {
+            _alreadyHit.Clear();
+        }
     }
 }

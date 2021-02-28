@@ -2,62 +2,65 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class WeaponPolarStar : Weapon
+namespace Fami.CaveStory
 {
-    bool pressed;
-
-    public override void DoUpdate()
+    public class WeaponPolarStar : Weapon
     {
-        if (Input.GetKeyDown(KeyCode.Q))
+        bool pressed;
+
+        public override void DoUpdate()
         {
-            pressed = true;
-            Experience -= 1;
+            if (Input.GetKeyDown(KeyCode.Q))
+            {
+                pressed = true;
+                Experience -= 1;
+            }
+            else if (Input.GetKeyDown(KeyCode.W))
+            {
+                pressed = true;
+                Experience += 1;
+            }
+            else if (Input.GetKeyDown(KeyCode.X))
+            {
+                Shoot();
+            }
+
+            if (pressed)
+            {
+                pressed = false;
+                Debug.Log("Exp: " + Experience + ", Fraction: " + ExperienceFraction());
+            }
         }
-        else if (Input.GetKeyDown(KeyCode.W))
+
+        public override void Awake()
         {
-            pressed = true;
-            Experience += 1;
+            base.Awake();
+            projectileCount = new HashSet<Projectile>();
+            OnProjectileDestroy += DestroyProjectle;
         }
-        else if (Input.GetKeyDown(KeyCode.X))
+
+        private void OnDestroy()
         {
-            Shoot();
+            OnProjectileDestroy -= DestroyProjectle;
         }
 
-        if (pressed)
+        private void Shoot()
         {
-            pressed = false;
-            Debug.Log("Exp: " + Experience + ", Fraction: " + ExperienceFraction());
+            if (projectileCount.Count < projectileLimit)
+            {
+                ProjectilePolarStar p = GameObject.Instantiate(GetCurrentProjectile).GetComponent<ProjectilePolarStar>();
+                p.owner = this;
+                p.Direction = this.Direction;
+                p.transform.position = (Vector2)transform.position + p.GetVecFromDirection(Direction) * 0.75f + Vector2.down * 0.2f;
+
+                projectileCount.Add(p);
+            }
         }
-    }
 
-    public override void Awake()
-    {
-        base.Awake();
-        projectileCount = new HashSet<Projectile>();
-        OnProjectileDestroy += DestroyProjectle;
-    }
-
-    private void OnDestroy()
-    {
-        OnProjectileDestroy -= DestroyProjectle;
-    }
-
-    private void Shoot()
-    {
-        if (projectileCount.Count < projectileLimit)
+        protected override void DestroyProjectle(Projectile projectile)
         {
-            ProjectilePolarStar p = GameObject.Instantiate(GetCurrentProjectile).GetComponent<ProjectilePolarStar>();
-            p.owner = this;
-            p.Direction = this.Direction;
-            p.transform.position = (Vector2)transform.position + p.GetVecFromDirection(Direction) * 0.75f + Vector2.down * 0.2f;
-
-            projectileCount.Add(p);
+            projectileCount.Remove(projectile);
+            Destroy(projectile.gameObject);
         }
-    }
-
-    protected override void DestroyProjectle(Projectile projectile)
-    {
-        projectileCount.Remove(projectile);
-        Destroy(projectile.gameObject);
     }
 }

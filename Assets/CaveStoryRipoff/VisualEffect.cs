@@ -2,35 +2,38 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-[RequireComponent(typeof(SpriteRenderer), typeof(Animator))]
-public class VisualEffect : MonoBehaviour
+namespace Fami.CaveStory
 {
-    [SerializeField] private VisualEffectTemplate effect;
-
-    private SpriteRenderer spriteRenderer;
-    private Animator animator;
-    private IEnumerator wait;
-    // Start is called before the first frame update
-    void Start()
+    [RequireComponent(typeof(SpriteRenderer), typeof(Animator))]
+    public class VisualEffect : MonoBehaviour
     {
-        spriteRenderer = GetComponent<SpriteRenderer>();
-        spriteRenderer.sprite = effect.initialSprite;
+        [SerializeField] private VisualEffectTemplate effect;
 
-        animator = GetComponent<Animator>();
-        animator.runtimeAnimatorController = effect.animator.runtimeAnimatorController;
-        wait = IWaitForAnimation();
-        StartCoroutine(wait);
-    }
-
-    private IEnumerator IWaitForAnimation()
-    {
-        /*
-        while (animator.)
+        private SpriteRenderer spriteRenderer;
+        private Animator animator;
+        private IEnumerator wait;
+        // Start is called before the first frame update
+        void Start()
         {
+            spriteRenderer = GetComponent<SpriteRenderer>();
+            spriteRenderer.sprite = effect.initialSprite;
+
+            animator = GetComponent<Animator>();
+            animator.runtimeAnimatorController = effect.animator.runtimeAnimatorController;
+            wait = IWaitForAnimation();
+            StartCoroutine(wait);
+        }
+
+        private IEnumerator IWaitForAnimation()
+        {
+            /*
+            while (animator.)
+            {
+
+            }
+            */
+            yield return null;
 
         }
-        */
-        yield return null;
-
     }
 }

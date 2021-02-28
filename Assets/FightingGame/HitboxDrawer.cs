@@ -2,78 +2,81 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class HitboxDrawer : MonoBehaviour
+namespace Fami.FightingGame
 {
-    public Move move;
-    public int frame;
-    public bool drawHitboxes = true;
-    public bool inEditorDraw = true;
-
-    private Hit current(int index)
+    public class HitboxDrawer : MonoBehaviour
     {
-        return move.hitCollection[index];
-    }
+        public Move move;
+        public int frame;
+        public bool drawHitboxes = true;
+        public bool inEditorDraw = true;
 
-    private void OnDrawGizmos()
-    {
-        if (drawHitboxes && move != null && move.hitCollection != null)
+        private Hit current(int index)
         {
-            if (!inEditorDraw)
-            {
-                foreach (Hit hitbox in move.activeHitboxes)
-                {
-                    DrawHitbox(hitbox);
-                }
-            }
-            else
-            {
-                for (int i = 0; i < move.hitCollection.Length; i++)
-                {
-                    if (current(i).isMultiHit)
-                    {
-                        List<int> start = new List<int>(current(i).MultiFrameStart);
-                        List<int> end = new List<int>(current(i).MultiFrameEnd);
+            return move.hitCollection[index];
+        }
 
-                        for (int j = 0; j < start.Count; j++)
+        private void OnDrawGizmos()
+        {
+            if (drawHitboxes && move != null && move.hitCollection != null)
+            {
+                if (!inEditorDraw)
+                {
+                    foreach (Hit hitbox in move.activeHitboxes)
+                    {
+                        DrawHitbox(hitbox);
+                    }
+                }
+                else
+                {
+                    for (int i = 0; i < move.hitCollection.Length; i++)
+                    {
+                        if (current(i).isMultiHit)
                         {
-                            if (start[j] <= frame && end[j] >= frame)
+                            List<int> start = new List<int>(current(i).MultiFrameStart);
+                            List<int> end = new List<int>(current(i).MultiFrameEnd);
+
+                            for (int j = 0; j < start.Count; j++)
                             {
-                                DrawHitbox(current(i));
+                                if (start[j] <= frame && end[j] >= frame)
+                                {
+                                    DrawHitbox(current(i));
+                                }
+                                //print("Current: " + f + ", Start: " + start[j] + ", End; " + end[j]);
                             }
-                            //print("Current: " + f + ", Start: " + start[j] + ", End; " + end[j]);
+                        }
+                        else if (current(i).frameStart <= frame && current(i).frameEnd >= frame)
+                        {
+                            DrawHitbox(current(i));
                         }
                     }
-                    else if (current(i).frameStart <= frame && current(i).frameEnd >= frame)
-                    {
-                        DrawHitbox(current(i));
-                    }
                 }
             }
         }
-    }
 
-    private void DrawHitbox(Hit hitbox)
-    {
-        switch (hitbox.priority)
+        private void DrawHitbox(Hit hitbox)
         {
-            case int n when (n == 0):
-                Gizmos.color = Color.red;
-                break;
-            case int n when (n == 1):
-                Gizmos.color = Color.blue;
-                break;
-            case int n when (n == 2):
-                Gizmos.color = Color.magenta;
-                break;
-            case int n when (n >= 3):
-                Gizmos.color = Color.green;
-                break;
-            default:
-                break;
-        }
+            switch (hitbox.priority)
+            {
+                case int n when (n == 0):
+                    Gizmos.color = Color.red;
+                    break;
+                case int n when (n == 1):
+                    Gizmos.color = Color.blue;
+                    break;
+                case int n when (n == 2):
+                    Gizmos.color = Color.magenta;
+                    break;
+                case int n when (n >= 3):
+                    Gizmos.color = Color.green;
+                    break;
+                default:
+                    break;
+            }
 
-        Vector2 pos = hitbox.Pos + (hitbox.follow == null ? (Vector2)gameObject.transform.position : (Vector2)hitbox.follow.position);
-        Gizmos.DrawWireCube(pos, hitbox.Size);
-        print("drawing...");
+            Vector2 pos = hitbox.Pos + (hitbox.follow == null ? (Vector2)gameObject.transform.position : (Vector2)hitbox.follow.position);
+            Gizmos.DrawWireCube(pos, hitbox.Size);
+            print("drawing...");
+        }
     }
 }

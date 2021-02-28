@@ -4,6 +4,9 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Rendering;
 
+namespace Fami.MeshGeneration
+{
+
 [System.Serializable]
 public struct Stat {
     [SerializeField] private string _name;
@@ -106,5 +109,6 @@ public class MeshGeneration : MonoBehaviour {
     private void OnValidate() {
         GenerateMesh();
         //AnimateMesh();
+    }
     }
 }
